@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import Navbar from '../components/Navbar';  // Importa el Navbar
+import Navbar from '../components/Navbar'; // Importamos el Navbar
 
 const Dashboard = () => {
   const [comment, setComment] = useState('');
@@ -40,41 +40,58 @@ const Dashboard = () => {
     <div>
       <Navbar />  {/* Aquí estamos usando el Navbar */}
 
-      <h1>Dashboard</h1>
-
-      <div>
-        <h2>Gráfico de Sentimientos</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Line type="monotone" dataKey="cantidad" stroke="#8884d8" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
-      <div style={{ marginTop: '30px' }}>
-        <h2>Analizar Comentario</h2>
-        <form onSubmit={handleAnalyze}>
-          <textarea
-            rows="4"
-            cols="50"
-            placeholder="Escribe un comentario para analizar..."
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            required
-          ></textarea>
-          <br />
-          <button type="submit">Analizar</button>
-        </form>
-        {result && (
-          <div className="alert alert-info mt-3" role="alert">
-            <strong>{result}</strong>
+      <div className="container mt-5">
+        <div className="row">
+          {/* Columna para el gráfico */}
+          <div className="col-md-8">
+            <div className="card shadow-sm">
+              <div className="card-header">
+                <h2>Gráfico de Sentimientos</h2>
+              </div>
+              <div className="card-body" style={{ height: 300 }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={data}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Line type="monotone" dataKey="cantidad" stroke="#8884d8" />
+                  </LineChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
           </div>
-        )}
+
+          {/* Columna para el formulario y resultado */}
+          <div className="col-md-4">
+            <div className="card shadow-sm">
+              <div className="card-header">
+                <h2>Analizar Comentario</h2>
+              </div>
+              <div className="card-body">
+                <form onSubmit={handleAnalyze}>
+                  <div className="mb-3">
+                    <textarea
+                      className="form-control"
+                      rows="4"
+                      placeholder="Escribe un comentario para analizar..."
+                      value={comment}
+                      onChange={(e) => setComment(e.target.value)}
+                      required
+                    ></textarea>
+                  </div>
+                  <button type="submit" className="btn btn-primary w-100">Analizar</button>
+                </form>
+                {result && (
+                  <div className="alert alert-info mt-3" role="alert">
+                    <strong>{result}</strong>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

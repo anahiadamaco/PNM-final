@@ -13,7 +13,7 @@ function Login() {
 
   return (
     <div className="container d-flex justify-content-center align-items-center vh-100">
-      <div className="card shadow p-4" style={{ width: '100%', maxWidth: '400px' }}>
+      <div className="card shadow-lg p-4" style={{ width: '100%', maxWidth: '400px' }}>
         <h2 className="text-center mb-4">Iniciar Sesión</h2>
         <form onSubmit={handleLogin}>
           <div className="mb-3">
@@ -36,8 +36,12 @@ function Login() {
               required
             />
           </div>
-          <button type="submit" className="btn btn-primary w-100">Iniciar sesión</button>
+          <button type="submit" className="btn btn-primary w-100 py-2 mt-3">
+            Iniciar sesión
+          </button>
         </form>
+        <div className="text-center mt-3">
+        </div>
       </div>
     </div>
   );
