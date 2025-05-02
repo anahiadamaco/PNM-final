@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
+const Register = () => {
   const [form, setForm] = useState({ username: '', password: '' });
   const navigate = useNavigate();
 
@@ -12,7 +12,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch('http://localhost:8000/login', {
+      const res = await fetch('http://localhost:8000/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -21,27 +21,26 @@ const Login = () => {
       const data = await res.json();
 
       if (data.success) {
-        localStorage.setItem('token', data.token);
-        navigate('/dashboard');
+        alert('Registro exitoso. Ahora inicia sesión.');
+        navigate('/');
       } else {
         alert(data.message);
       }
     } catch (err) {
-      console.error('Error al iniciar sesión:', err);
+      console.error('Error al registrar:', err);
     }
   };
 
   return (
     <div className="container mt-5">
-      <h2>Iniciar sesión</h2>
+      <h2>Registro</h2>
       <form onSubmit={handleSubmit}>
         <input name="username" type="text" className="form-control" placeholder="Usuario" onChange={handleChange} />
         <input name="password" type="password" className="form-control mt-2" placeholder="Contraseña" onChange={handleChange} />
-        <button className="btn btn-primary mt-3">Entrar</button>
+        <button className="btn btn-success mt-3">Registrarse</button>
       </form>
-      <p className="mt-3">¿No tienes cuenta? <Link to="/register">Regístrate aquí</Link></p>
     </div>
   );
 };
 
-export default Login;
+export default Register;
