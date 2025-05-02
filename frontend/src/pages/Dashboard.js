@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import Navbar from '../components/Navbar'; // Importamos el Navbar
 
@@ -11,22 +11,48 @@ const Dashboard = () => {
   });
   const [result, setResult] = useState('');
 
-  const handleAnalyze = (e) => {
+  // Cargar historial de análisis al iniciar
+  useEffect(() => {
+    fetch('http://localhost:8000/historial')
+      .then((res) => res.json())
+      .then((data) => {
+        const conteo = { positivo: 0, negativo: 0, neutro: 0 };
+        data.forEach((item) => {
+          const tipo = item.sentimiento.toLowerCase();
+          if (conteo[tipo] !== undefined) conteo[tipo]++;
+        });
+        setSentimentData(conteo);
+      })
+      .catch((err) => console.error('Error al cargar historial:', err));
+  }, []);
+
+  const handleAnalyze = async (e) => {
     e.preventDefault();
 
-    // Simulación de análisis aleatorio
-    const resultados = ['Positivo', 'Neutro', 'Negativo'];
-    const resultadoAleatorio = resultados[Math.floor(Math.random() * resultados.length)];
+    try {
+      const response = await fetch('http://localhost:8000/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ comment }),
+      });
 
-    // Actualiza la cantidad de comentarios según el sentimiento detectado
-    setSentimentData((prevData) => ({
-      ...prevData,
-      [resultadoAleatorio.toLowerCase()]: prevData[resultadoAleatorio.toLowerCase()] + 1,
-    }));
+      const data = await response.json();
+      const resultado = data.sentiment;
 
-    // Guarda el resultado en el estado
-    setResult(`Sentimiento detectado: ${resultadoAleatorio}`);
-    setComment('');
+      // Actualiza los datos del gráfico
+      setSentimentData((prevData) => ({
+        ...prevData,
+        [resultado.toLowerCase()]: prevData[resultado.toLowerCase()] + 1,
+      }));
+
+      setResult(`Sentimiento detectado: ${resultado}`);
+      setComment('');
+    } catch (error) {
+      console.error('Error al analizar:', error);
+      setResult('Hubo un error al analizar el comentario.');
+    }
   };
 
   // Datos para el gráfico basado en los comentarios
@@ -89,6 +115,24 @@ const Dashboard = () => {
                   </div>
                 )}
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Historial de comentarios analizados */}
+        <div className="row mt-4">
+          <div className="col-md-12">
+            <div className="card">
+              <div className="card-header">
+                <h5>Historial de Comentarios Analizados</h5>
+              </div>
+              <ul className="list-group list-group-flush">
+                {Object.entries(sentimentData).map(([tipo, cantidad]) => (
+                  <li key={tipo} className="list-group-item">
+                    {tipo.charAt(0).toUpperCase() + tipo.slice(1)}: {cantidad}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
