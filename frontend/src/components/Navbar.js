@@ -1,7 +1,18 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+  const navigate = useNavigate();  // Usamos useNavigate para redirigir
+
+  // Función para manejar el cierre de sesión
+  const handleLogout = () => {
+    // Eliminar el user_id del localStorage
+    localStorage.removeItem('user_id');
+    
+    // Redirigir al login (ajusta la ruta según tu estructura)
+    navigate('/');
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
       <div className="container">
@@ -22,6 +33,12 @@ const Navbar = () => {
               <Link className="btn btn-outline-light" to="/history">
                 Historial
               </Link>
+            </li>
+            {/* Botón para cerrar sesión */}
+            <li className="nav-item">
+              <button className="btn btn-outline-light" onClick={handleLogout}>
+                Cerrar sesión
+              </button>
             </li>
           </ul>
         </div>

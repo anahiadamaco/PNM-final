@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import Navbar from '../components/Navbar'; // Importamos el Navbar
+import Navbar from '../components/Navbar';
 
 const Dashboard = () => {
   const [comment, setComment] = useState('');
@@ -10,42 +10,58 @@ const Dashboard = () => {
     neutro: 0,
   });
   const [result, setResult] = useState('');
+  const [history, setHistory] = useState([]); // Agregado para mostrar historial real
 
-  // Cargar historial de análisis al iniciar
   useEffect(() => {
-    fetch('http://localhost:8000/historial')
-      .then((res) => res.json())
-      .then((data) => {
-        const conteo = { positivo: 0, negativo: 0, neutro: 0 };
-        data.forEach((item) => {
-          const tipo = item.sentimiento.toLowerCase();
-          if (conteo[tipo] !== undefined) conteo[tipo]++;
-        });
-        setSentimentData(conteo);
+    const userId = localStorage.getItem('user_id');
+    if (!userId) return;
+
+    fetch(`http://localhost:8000/history/${userId}`)
+      .then((res) => {
+        if (!res.ok) throw new Error('No se pudo obtener historial');
+        return res.json();
       })
-      .catch((err) => console.error('Error al cargar historial:', err));
+      .then((data) => {
+        setHistory(data);
+
+        // Contar sentimientos para el gráfico
+        const contadores = { positivo: 0, negativo: 0, neutro: 0 };
+        data.forEach((c) => {
+          contadores[c.sentiment.toLowerCase()] += 1;
+        });
+        setSentimentData(contadores);
+      })
+      .catch((err) => {
+        console.error('Error al cargar historial:', err);
+      });
   }, []);
 
   const handleAnalyze = async (e) => {
     e.preventDefault();
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      setResult('Error: usuario no identificado');
+      return;
+    }
 
     try {
       const response = await fetch('http://localhost:8000/analyze', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ comment }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment, user_id: userId }),
       });
 
       const data = await response.json();
       const resultado = data.sentiment;
 
-      // Actualiza los datos del gráfico
-      setSentimentData((prevData) => ({
-        ...prevData,
-        [resultado.toLowerCase()]: prevData[resultado.toLowerCase()] + 1,
+      // Actualizar gráfico
+      setSentimentData((prev) => ({
+        ...prev,
+        [resultado.toLowerCase()]: prev[resultado.toLowerCase()] + 1,
       }));
+
+      // Agregar al historial local
+      setHistory((prev) => [...prev, { text: comment, sentiment: resultado }]);
 
       setResult(`Sentimiento detectado: ${resultado}`);
       setComment('');
@@ -55,7 +71,6 @@ const Dashboard = () => {
     }
   };
 
-  // Datos para el gráfico basado en los comentarios
   const data = [
     { name: 'Positivos', cantidad: sentimentData.positivo },
     { name: 'Negativos', cantidad: sentimentData.negativo },
@@ -64,16 +79,13 @@ const Dashboard = () => {
 
   return (
     <div>
-      <Navbar />  {/* Aquí estamos usando el Navbar */}
-
+      <Navbar />
       <div className="container mt-5">
         <div className="row">
-          {/* Columna para el gráfico */}
+          {/* Gráfico */}
           <div className="col-md-8">
             <div className="card shadow-sm">
-              <div className="card-header">
-                <h2>Gráfico de Sentimientos</h2>
-              </div>
+              <div className="card-header"><h2>Gráfico de Sentimientos</h2></div>
               <div className="card-body" style={{ height: 300 }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={data}>
@@ -89,12 +101,10 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Columna para el formulario y resultado */}
+          {/* Formulario */}
           <div className="col-md-4">
             <div className="card shadow-sm">
-              <div className="card-header">
-                <h2>Analizar Comentario</h2>
-              </div>
+              <div className="card-header"><h2>Analizar Comentario</h2></div>
               <div className="card-body">
                 <form onSubmit={handleAnalyze}>
                   <div className="mb-3">
@@ -110,7 +120,7 @@ const Dashboard = () => {
                   <button type="submit" className="btn btn-primary w-100">Analizar</button>
                 </form>
                 {result && (
-                  <div className="alert alert-info mt-3" role="alert">
+                  <div className="alert alert-info mt-3">
                     <strong>{result}</strong>
                   </div>
                 )}
@@ -119,7 +129,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Historial de comentarios analizados */}
+        {/* Historial */}
         <div className="row mt-4">
           <div className="col-md-12">
             <div className="card">
@@ -127,9 +137,20 @@ const Dashboard = () => {
                 <h5>Historial de Comentarios Analizados</h5>
               </div>
               <ul className="list-group list-group-flush">
-                {Object.entries(sentimentData).map(([tipo, cantidad]) => (
-                  <li key={tipo} className="list-group-item">
-                    {tipo.charAt(0).toUpperCase() + tipo.slice(1)}: {cantidad}
+                {history.map((item, index) => (
+                  <li key={index} className="list-group-item d-flex justify-content-between">
+                    <span>{item.text}</span>
+                    <span
+                      className={`badge ${
+                        item.sentiment === 'Positivo'
+                          ? 'bg-success'
+                          : item.sentiment === 'Negativo'
+                          ? 'bg-danger'
+                          : 'bg-secondary'
+                      }`}
+                    >
+                      {item.sentiment}
+                    </span>
                   </li>
                 ))}
               </ul>

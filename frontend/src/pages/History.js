@@ -2,16 +2,20 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';  // Importa el Navbar
 
 function History() {
-  const [historyData, setHistoryData] = useState([]);
+  const [historyData, setHistoryData] = useState([]);  // Guardamos los datos del historial
 
-  // Cargar historial de análisis al iniciar
+  // Usamos useEffect para cargar el historial de análisis cuando la página se carga
   useEffect(() => {
-    fetch('http://localhost:8000/historial')
-      .then((res) => res.json())
-      .then((data) => {
-        setHistoryData(data);
+    const userId = localStorage.getItem('user_id'); // Obtener el ID del usuario de localStorage
+
+    // Hacer una solicitud GET al backend para obtener el historial
+    fetch(`http://localhost:8000/history/${userId}`)
+      .then(res => res.json())  // Convertir la respuesta a formato JSON
+      .then(data => {
+        console.log("Datos del historial:", data);  // Ver los datos recibidos en la consola para verificar
+        setHistoryData(data);  // Guardamos los datos en el estado
       })
-      .catch((err) => console.error('Error al cargar historial:', err));
+      .catch(err => console.error("Error al cargar historial:", err));  // Manejar cualquier error
   }, []);
 
   return (
@@ -25,11 +29,12 @@ function History() {
         <div className="list-group">
           {historyData.map((item, index) => (
             <div key={index} className="list-group-item d-flex justify-content-between align-items-center">
-              <span>{item.comentario}</span>
+              <span>{item.text}</span>  {/* Mostrar el comentario */}
               <span
-                className={`badge ${item.sentimiento === 'Positivo' ? 'bg-success' : item.sentimiento === 'Negativo' ? 'bg-danger' : 'bg-secondary'}`}
+                className={`badge ${item.sentiment === 'Positivo' ? 'bg-success' : item.sentiment === 'Negativo' ? 'bg-danger' : 'bg-secondary'}`}
               >
-                {item.sentimiento === 'Positivo' ? 'Positivo 😀' : item.sentimiento === 'Negativo' ? 'Negativo 😞' : 'Neutral 😐'}
+                {/* Mostrar el sentimiento con el ícono correspondiente */}
+                {item.sentiment === 'Positivo' ? 'Positivo 😀' : item.sentiment === 'Negativo' ? 'Negativo 😞' : 'Neutral 😐'}
               </span>
             </div>
           ))}
