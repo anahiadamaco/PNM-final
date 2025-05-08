@@ -9,7 +9,7 @@ function History() {
     const userId = localStorage.getItem('user_id'); // Obtener el ID del usuario de localStorage
 
     // Hacer una solicitud GET al backend para obtener el historial
-    fetch(`http://localhost:8000/history/${userId}`)
+    fetch(`${process.env.REACT_APP_API_URL}/history/${userId}`)
       .then(res => res.json())  // Convertir la respuesta a formato JSON
       .then(data => {
         console.log("Datos del historial:", data);  // Ver los datos recibidos en la consola para verificar

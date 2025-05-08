@@ -16,7 +16,8 @@ const Dashboard = () => {
     const userId = localStorage.getItem('user_id');
     if (!userId) return;
 
-    fetch(`http://localhost:8000/history/${userId}`)
+    // Cambié la URL para usar la variable de entorno
+    fetch(`${process.env.REACT_APP_API_URL}/history/${userId}`)
       .then((res) => {
         if (!res.ok) throw new Error('No se pudo obtener historial');
         return res.json();
@@ -45,7 +46,8 @@ const Dashboard = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8000/analyze', {
+      // Cambié la URL para usar la variable de entorno
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ comment, user_id: userId }),
