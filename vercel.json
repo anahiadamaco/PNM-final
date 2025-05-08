@@ -9,5 +9,16 @@
         "src": "backend/app.py",
         "use": "@vercel/python"
       }
+    ],
+    "routes": [
+      {
+        "src": "/(.*)",
+        "dest": "/frontend/$1"
+      },
+      {
+        "src": "/api/(.*)",
+        "dest": "/backend/$1"
+      }
     ]
   }
+  
