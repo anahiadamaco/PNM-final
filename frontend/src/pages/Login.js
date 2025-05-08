@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function Login() {
+const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -13,17 +13,15 @@ function Login() {
     try {
       const res = await fetch(`${process.env.REACT_APP_API_URL}/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        localStorage.setItem('user_id', data.user_id); // Guardamos el ID del usuario
-        navigate('/dashboard'); // Redirige al Dashboard
+        localStorage.setItem('user_id', data.user_id); // Guardar el ID del usuario
+        navigate('/dashboard'); // Redirigir al Dashboard
       } else {
         setError(data.message || 'Error al iniciar sesión');
       }
@@ -60,11 +58,8 @@ function Login() {
         {error && <div className="alert alert-danger">{error}</div>}
         <button type="submit" className="btn btn-primary">Ingresar</button>
       </form>
-      <div className="mt-3">
-        <p>No tienes cuenta? <a href="/register">Regístrate aquí</a></p>
-      </div>
     </div>
   );
-}
+};
 
 export default Login;
