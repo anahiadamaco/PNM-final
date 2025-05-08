@@ -2,7 +2,7 @@
     "rewrites": [
       {
         "source": "/api/(.*)",
-        "destination": "http://tu-backend-en-render.com/api/$1"
+        "destination": "https://pnm-backend-6oxl.onrender.com/api/$1"
       }
     ]
   }
